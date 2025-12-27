@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation'; // Added for search navigation
-import { ShoppingCart, Search, Menu, X, User as UserIcon, LogOut, ChevronDown } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ShoppingCart, Search, Menu, X, User as UserIcon, LogOut, ChevronDown, Home, Store, Info, Phone } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
@@ -15,30 +15,29 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(""); // Track search input
+  const [searchQuery, setSearchQuery] = useState("");
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   
   const { cart } = useCart();
 
-  // Search Logic: Navigate to shop with query
+  // Search Logic
   const handleSearchSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
       setIsSearchOpen(false);
       setSearchQuery("");
+      setIsMobileMenuOpen(false);
     }
   };
 
-  // Trigger search on "Enter" key
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSearchSubmit();
     }
   };
 
-  // Listen for Auth Changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -46,7 +45,6 @@ export default function Navbar() {
     return () => unsubscribe();
   }, []);
 
-  // Handle Scroll Effect
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -55,7 +53,6 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Logout Function
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -120,7 +117,7 @@ export default function Navbar() {
                    onKeyDown={handleKeyDown}
                    autoFocus
                    placeholder="Search pahadi products..." 
-                   className="absolute right-10 bg-white border border-gray-200 px-4 py-2 rounded-full text-sm outline-none w-64 shadow-lg animate-in slide-in-from-right-4 duration-300"
+                   className="absolute right-10 bg-white border border-gray-200 px-4 py-2 rounded-full text-sm outline-none w-64 shadow-lg animate-in slide-in-from-right-4 duration-300 text-gray-800"
                  />
                )}
                <Search 
@@ -222,7 +219,101 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Auth Modal Component */}
+      {/* --- MOBILE SIDEBAR MENU --- */}
+      <div className={`fixed inset-0 z-[100] transition-visibility duration-300 ${isMobileMenuOpen ? 'visible' : 'invisible'}`}>
+        {/* Backdrop */}
+        <div 
+          className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0'}`} 
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+        
+        {/* Menu Content */}
+        <div className={`absolute left-0 top-0 h-full w-[80%] max-w-sm bg-white shadow-2xl transition-transform duration-300 ease-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          <div className="flex flex-col h-full">
+            
+            {/* Menu Header */}
+            <div className="flex items-center justify-between px-6 py-6 border-b border-gray-100">
+              <img src="/logo.svg" alt="Logo" className="h-16 w-auto" />
+              <button 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-2 rounded-full bg-gray-50 text-gray-500 hover:bg-gray-100"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Menu Links */}
+            <div className="flex-1 overflow-y-auto py-6 px-6 space-y-2">
+              <Link 
+                href="/" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-700 hover:bg-brandPrimary/5 hover:text-brandPrimary font-bold transition-all"
+              >
+                <Home size={20} /> Home
+              </Link>
+              <Link 
+                href="/shop" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-700 hover:bg-brandPrimary/5 hover:text-brandPrimary font-bold transition-all"
+              >
+                <Store size={20} /> Shop
+              </Link>
+              <Link 
+                href="/about" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-700 hover:bg-brandPrimary/5 hover:text-brandPrimary font-bold transition-all"
+              >
+                <Info size={20} /> Our Story
+              </Link>
+              <Link 
+                href="/contact" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-700 hover:bg-brandPrimary/5 hover:text-brandPrimary font-bold transition-all"
+              >
+                <Phone size={20} /> Contact
+              </Link>
+
+              {user && (
+                <>
+                  <div className="h-px bg-gray-100 my-4" />
+                  <Link 
+                    href="/orders" 
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-4 px-4 py-3 rounded-xl text-gray-700 hover:bg-brandPrimary/5 hover:text-brandPrimary font-bold transition-all"
+                  >
+                    <ShoppingCart size={20} /> My Orders
+                  </Link>
+                  <button 
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 font-bold transition-all"
+                  >
+                    <LogOut size={20} /> Logout
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Menu Footer */}
+            <div className="p-6 border-t border-gray-100 bg-gray-50">
+              {!user && (
+                <button 
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    setIsAuthModalOpen(true);
+                  }}
+                  className="w-full py-4 bg-brandPrimary text-white rounded-xl font-black shadow-lg shadow-brandPrimary/20"
+                >
+                  Join the Haat
+                </button>
+              )}
+              <p className="mt-4 text-center text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                © 2024 Haatwale • Himalayan Born
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <AuthModal 
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
