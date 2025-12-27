@@ -1,36 +1,49 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { products, Product } from '@/data/products';
 import { useCart } from '../context/CartContext';
 import Link from 'next/link';
-import { ShoppingCart, Filter } from 'lucide-react';
-// 1. Import the Quantity Modal
+// Import Loader2 to fix the 'not defined' error
+import { ShoppingCart, Filter, SearchX, Star, Loader2 } from 'lucide-react'; 
 import QuantityModal from '../components/QuantityModal';
 
-export default function Shop() {
+function ShopContent() {
   const { addToCart } = useCart();
+  const searchParams = useSearchParams();
   
-  // 2. Add State for the Modal
+  // Get search term from URL
+  const searchTerm = searchParams.get('search')?.toLowerCase() || "";
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  // 3. Handler to open Modal
+  // Filter Logic
+  const filteredProducts = useMemo(() => {
+    if (!searchTerm) return products;
+    
+    return products.filter((product: Product) => {
+      const nameMatch = product.name.toLowerCase().includes(searchTerm);
+      const descMatch = product.desc.toLowerCase().includes(searchTerm);
+      const categoryMatch = product.category?.toLowerCase().includes(searchTerm);
+      
+      return nameMatch || descMatch || categoryMatch;
+    });
+  }, [searchTerm]);
+
   const openQuickAdd = (product: Product) => {
     setSelectedProduct(product);
     setIsModalOpen(true);
   };
 
-  // 4. Handler when user confirms inside Modal
   const handleConfirmAdd = (product: Product, variant: string, price: number) => {
     addToCart(product, variant, price);
     setIsModalOpen(false);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-32 pb-20 px-6">
-      
-      {/* 5. The Quantity Modal Component */}
+    <div className="max-w-7xl mx-auto">
       <QuantityModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
@@ -38,67 +51,108 @@ export default function Shop() {
         onConfirm={handleConfirmAdd} 
       />
 
-      <div className="max-w-7xl mx-auto">
-        
-        {/* Page Header */}
-        <div className="text-center mb-16 space-y-4">
-          <span className="text-[#6BBF46] font-bold tracking-widest uppercase text-sm">Full Catalogue</span>
-          <h1 className="text-4xl md:text-5xl font-bold text-[#053B28]">All Products</h1>
-          <p className="text-gray-500 max-w-2xl mx-auto">
-            Explore our complete collection of mountain pulses, wild spices, and herbal wellness products.
-          </p>
+      {/* --- MODERN HEADER --- */}
+      <div className="text-center mb-16 space-y-4">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#6BBF46]/10 text-[#6BBF46] text-[10px] font-bold uppercase tracking-[0.2em]">
+          <Star size={12} fill="currentColor" /> Premium Organic Selection
         </div>
+        <h1 className="text-5xl md:text-6xl font-bold text-[#053B28] tracking-tight">
+          {searchTerm ? `Results for "${searchTerm}"` : "The Pahadi Shop"}
+        </h1>
+        <p className="text-gray-500 max-w-xl mx-auto text-lg font-medium leading-relaxed">
+          {searchTerm 
+            ? `We found ${filteredProducts.length} authentic mountain treasures for you.`
+            : "Handpicked, sun-dried, and chemical-free produce from the heart of the Himalayas."
+          }
+        </p>
+      </div>
 
-        {/* Filters (Visual only for now) */}
-        <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-200">
-          <p className="text-gray-500 font-medium">{products.length} Products Found</p>
-          <button className="flex items-center gap-2 text-[#053B28] font-bold hover:text-[#6BBF46] transition-colors">
-            <Filter size={18} /> Filter
-          </button>
+      {/* --- CLASSIC FILTERS BAR --- */}
+      <div className="flex justify-between items-end mb-10 pb-6 border-b border-gray-100">
+        <div>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Catalogue</p>
+          <p className="text-sm font-bold text-[#053B28]">{filteredProducts.length} Items Available</p>
         </div>
-        
-        {/* Product Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {products.map((product) => (
-            <div key={product.id} className="group bg-white border border-gray-100 rounded-3xl p-4 hover:shadow-xl hover:border-[#6BBF46]/30 transition-all duration-300">
-              
-              {/* Image */}
-              <div className="relative h-64 w-full bg-[#F5F9F5] rounded-2xl overflow-hidden mb-4">
+        <button className="group flex items-center gap-3 bg-white border border-gray-200 px-6 py-3 rounded-2xl text-sm font-bold text-[#053B28] hover:border-[#6BBF46] hover:text-[#6BBF46] transition-all shadow-sm">
+          <Filter size={18} className="group-hover:rotate-180 transition-transform duration-500" /> 
+          Refine Search
+        </button>
+      </div>
+      
+      {/* --- EMPTY STATE --- */}
+      {filteredProducts.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-24 text-center space-y-6 bg-white rounded-[3rem] border border-dashed border-gray-200">
+          <div className="bg-gray-100 p-8 rounded-full">
+            <SearchX size={54} className="text-gray-300" />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-2xl font-bold text-[#053B28]">No matches found</h3>
+            <p className="text-gray-400 max-w-xs mx-auto text-sm">
+              We couldn&apos;t find any products matching your search. Try using more general keywords.
+            </p>
+          </div>
+          <Link href="/shop" className="bg-[#053B28] text-white px-8 py-3 rounded-xl font-bold hover:bg-[#6BBF46] transition-all shadow-lg">
+            View All Products
+          </Link>
+        </div>
+      ) : (
+        /* --- MODERN PRODUCT GRID --- */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+          {filteredProducts.map((product) => (
+            <div key={product.id} className="group flex flex-col">
+              <div className="relative aspect-[4/5] w-full bg-[#F5F9F5] rounded-[2.5rem] overflow-hidden mb-6 border border-transparent group-hover:border-[#6BBF46]/20 transition-all duration-500 shadow-sm group-hover:shadow-2xl group-hover:-translate-y-2">
                 <Link href={`/product/${product.id}`} className="block w-full h-full">
                   <img 
                     src={product.image} 
                     alt={product.name} 
-                    className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
+                    className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700"
                   />
                 </Link>
                 
-                {/* 6. Button Trigger: Opens Modal instead of direct add */}
+                {/* Cart Button: Always Visible */}
                 <button 
                   onClick={() => openQuickAdd(product)}
-                  className="absolute bottom-4 right-4 bg-white p-3 rounded-full shadow-md text-[#053B28] hover:bg-[#6BBF46] hover:text-white transition-colors translate-y-12 group-hover:translate-y-0 duration-300 z-10"
+                  className="absolute bottom-6 right-6 bg-[#6BBF46] p-4 rounded-2xl shadow-xl text-white hover:bg-[#053B28] hover:scale-110 active:scale-95 transition-all duration-300 z-10"
                 >
-                  <ShoppingCart size={20} />
+                  <ShoppingCart size={22} strokeWidth={2.5} />
                 </button>
+
+                <div className="absolute top-6 left-6 px-4 py-1.5 bg-white rounded-full border border-gray-100 shadow-sm">
+                  <span className="text-[10px] font-bold text-[#6BBF46] uppercase tracking-wider">100% Organic</span>
+                </div>
               </div>
               
-              {/* Info */}
-              <div className="px-2">
-                <p className="text-xs text-[#6BBF46] font-bold uppercase tracking-wider mb-1">Organic</p>
+              <div className="px-1 space-y-1">
                 <Link href={`/product/${product.id}`}>
-                  <h4 className="text-lg font-bold text-gray-900 mb-2 hover:text-[#6BBF46] cursor-pointer transition-colors">
+                  <h4 className="text-xl font-bold text-[#053B28] leading-tight hover:text-[#6BBF46] transition-colors line-clamp-2">
                     {product.name}
                   </h4>
                 </Link>
-                <div className="flex justify-between items-center">
-                  <span className="text-xl font-bold text-[#053B28]">₹{product.price}</span>
-                  <span className="text-xs text-gray-400 line-through">₹{product.price + 50}</span>
+                <p className="text-xs text-gray-400 font-medium line-clamp-1">{product.desc}</p>
+                <div className="pt-2 flex items-baseline gap-3">
+                  <span className="text-2xl font-black text-[#053B28]">₹{product.price}</span>
+                  <span className="text-sm text-gray-300 line-through font-medium">₹{product.price + 50}</span>
                 </div>
               </div>
             </div>
           ))}
         </div>
+      )}
+    </div>
+  );
+}
 
-      </div>
+export default function Shop() {
+  return (
+    <div className="min-h-screen bg-white pt-36 pb-24 px-8">
+      <Suspense fallback={
+        <div className="flex flex-col items-center justify-center py-40 gap-4">
+          <Loader2 className="animate-spin text-[#6BBF46]" size={40} />
+          <p className="text-[#053B28] font-bold animate-pulse">Sourcing from the mountains...</p>
+        </div>
+      }>
+        <ShopContent />
+      </Suspense>
     </div>
   );
 }
