@@ -722,29 +722,6 @@ export const products: Product[] = [
     }
   },
   { 
-    id: 29, 
-    name: "Himalayan Shilajit", 
-    price: 1500, 
-    image: "/himalayan_shilajit.svg", 
-    desc: "Pure resin strength.",
-    category: "Wellness",
-    story: "Shilajit is the 'Conqueror of Mountains'. It is a thick, sticky tar-like substance that oozes from the rocks of the Himalayas in summer. It is formed by the decomposition of plant matter over centuries. In Ayurveda, it is classified as a 'Rasayana' (Rejuvenator). Collecting Shilajit is dangerous work, involving climbing steep cliffs. The raw resin is then purified to remove rocks and impurities. Pahadi men have used Shilajit for centuries to maintain their legendary stamina and strength required for mountain life.",
-    health: [
-      "Stamina & Vigor: Boosts testosterone and energy levels.",
-      "Fulvic Acid: Improves nutrient absorption in the body.",
-      "Anti-Aging: Powerful antioxidant properties.",
-      "Mental Clarity: Enhances memory and focus."
-    ],
-    recipe: {
-      title: "Shilajit Vitality Drink",
-      steps: [
-        "Dissolve a pea-sized portion of Shilajit resin in warm milk or water.",
-        "Drink it in the morning on an empty stomach.",
-        "Do not boil it directly; add it to warm liquid only."
-      ]
-    }
-  },
-  { 
     id: 30, 
     name: "Malta Squash", 
     price: 350, 
