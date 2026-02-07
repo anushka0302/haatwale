@@ -15,8 +15,6 @@ interface QuantityModalProps {
 export default function QuantityModal({ isOpen, onClose, product, onConfirm }: QuantityModalProps) {
   const [mounted, setMounted] = useState(false);
 
-  // FIX 1: Use setTimeout to move the state update to the next tick.
-  // This satisfies the "synchronous setState" linter warning.
   useEffect(() => {
     const timer = setTimeout(() => {
       setMounted(true);
@@ -24,7 +22,6 @@ export default function QuantityModal({ isOpen, onClose, product, onConfirm }: Q
     return () => clearTimeout(timer);
   }, []);
 
-  // FIX 2: Handle Scroll Locking when modal opens
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -34,16 +31,11 @@ export default function QuantityModal({ isOpen, onClose, product, onConfirm }: Q
     return () => { document.body.style.overflow = 'unset'; }
   }, [isOpen]);
 
-  // Don't render until client-side hydration is complete
   if (!mounted || !isOpen || !product) return null;
 
-  // Render Portal (Teleports modal outside of Navbar stacking context)
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      
-      {/* Click overlay to close */}
       <div className="absolute inset-0" onClick={onClose}></div>
-
       <ModalContent 
         key={product.id} 
         product={product} 
@@ -55,47 +47,56 @@ export default function QuantityModal({ isOpen, onClose, product, onConfirm }: Q
   );
 }
 
-// --- INNER CONTENT COMPONENT ---
 function ModalContent({ product, onClose, onConfirm }: { 
   product: Product; 
   onClose: () => void; 
   onConfirm: (product: Product, variant: string, price: number) => void; 
 }) {
-  
   const [selectedOption, setSelectedOption] = useState<number>(0);
 
-  const isLiquid = product.name.toLowerCase().match(/oil|ghee|squash|juice|tea|liquid|burans|rhododendron|syrup|ark/);
-  const isSpice = product.name.toLowerCase().match(/spice|chili|turmeric|salt|herb|tea/);
+  // Updated Regex to include 'timur', 'pepper', 'mirch' explicitly
+  const isLiquid = product.name.toLowerCase().match(/oil|ghee|squash|juice|liquid|burans|rhododendron|syrup|ark/);
+  const isSpice = product.name.toLowerCase().match(/spice|chili|mirch|turmeric|salt|herb|tea|timur|pepper|powder/);
 
   let options = [];
 
+  // --- STRATEGIC PRICING LOGIC (Base Price = 1 KG) ---
   if (isLiquid) {
+    // Liquids (Glass Jars = Heavy Shipping + Fragile Packing)
     options = [
-      { label: "250 ml", multiplier: 0.3 },
-      { label: "500 ml", multiplier: 0.55 },
+      { label: "250 ml", multiplier: 0.35 }, 
+      { label: "500 ml", multiplier: 0.60 }, 
+      { label: "750 ml", multiplier: 0.85 }, // Added consistent step
       { label: "1 Liter", multiplier: 1.0 }, 
-      { label: "2 Liters", multiplier: 1.9 },
-      { label: "5 Liters", multiplier: 4.5 },
+      { label: "2 Liters", multiplier: 1.95 }, 
+      { label: "5 Liters", multiplier: 4.85 },
     ];
   } else if (isSpice) {
+    // Spices (Light Content, but High Value/Packaging)
+    // Fixed: Previous logic had 250gm at 1.0 (Full KG price). Now scaled to KG.
     options = [
-      { label: "30 gm", multiplier: 0.15 },
-      { label: "50 gm", multiplier: 0.25 },
-      { label: "100 gm", multiplier: 0.45 },
-      { label: "250 gm", multiplier: 1.0 },
-      { label: "500 gm", multiplier: 1.9 },
+      { label: "50 gm", multiplier: 0.08 },  // Small pack premium included
+      { label: "100 gm", multiplier: 0.15 },
+      { label: "250 gm", multiplier: 0.30 }, // ~25% weight + packaging cost
+      { label: "500 gm", multiplier: 0.55 },
+      { label: "750 gm", multiplier: 0.75 }, // EXACT calculation (367.5 for 490)
+      { label: "1 kg", multiplier: 1.0 },
     ];
   } else {
+    // Grains/Pulses/General (Pure Weight)
     options = [
-      { label: "250 gm", multiplier: 0.3 },
-      { label: "500 gm", multiplier: 0.55 },
+      { label: "250 gm", multiplier: 0.30 }, 
+      { label: "500 gm", multiplier: 0.55 }, 
+      { label: "750 gm", multiplier: 0.75 }, // Added 750gm option
       { label: "1 kg", multiplier: 1.0 },
-      { label: "2 kg", multiplier: 1.95 },
-      { label: "5 kg", multiplier: 4.8 },
+      { label: "2 kg", multiplier: 1.98 }, 
+      { label: "5 kg", multiplier: 4.90 }, 
     ];
   }
 
   const activeOption = options[selectedOption] || options[0];
+  
+  // Math.round ensures clean numbers (e.g. 367.5 becomes 368)
   const finalPrice = Math.round(product.price * activeOption.multiplier);
 
   const handleConfirm = () => {
@@ -109,13 +110,13 @@ function ModalContent({ product, onClose, onConfirm }: {
       {/* Header */}
       <div className="bg-[#F5F9F5] p-6 flex justify-between items-start">
         <div className="flex gap-4">
-            <div className="w-20 h-20 bg-white rounded-xl p-2 shadow-sm">
-              <img src={product.image} alt={product.name} className="w-full h-full object-contain" />
+            <div className="w-20 h-20 bg-white rounded-xl p-2 shadow-sm flex items-center justify-center">
+              <img src={product.image} alt={product.name} className="max-w-full max-h-full object-contain" />
             </div>
             <div>
               <p className="text-xs font-bold text-[#6BBF46] uppercase tracking-wider">Select Quantity</p>
-              <h3 className="text-xl font-bold text-[#053B28] leading-tight">{product.name}</h3>
-              <p className="text-gray-500 text-sm mt-1">Base Price: ₹{product.price}</p>
+              <h3 className="text-xl font-bold text-[#053B28] leading-tight line-clamp-2">{product.name}</h3>
+              <p className="text-gray-500 text-sm mt-1">Base Price: ₹{product.price} / kg</p>
             </div>
         </div>
         <button onClick={onClose} className="p-2 hover:bg-black/5 rounded-full text-gray-500 transition-colors">
@@ -123,7 +124,7 @@ function ModalContent({ product, onClose, onConfirm }: {
         </button>
       </div>
 
-      {/* Body */}
+      {/* Options Grid */}
       <div className="p-6">
         <label className="block text-sm font-bold text-gray-700 mb-4">Choose Pack Size:</label>
         
@@ -157,7 +158,7 @@ function ModalContent({ product, onClose, onConfirm }: {
           })}
         </div>
 
-        {/* Footer Action */}
+        {/* Footer Button */}
         <button 
           onClick={handleConfirm}
           className="w-full bg-[#053B28] hover:bg-[#6BBF46] text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-green-900/20 transition-all active:scale-95 flex items-center justify-center gap-2"

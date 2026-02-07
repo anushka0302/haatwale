@@ -5,29 +5,36 @@ import { useSearchParams } from 'next/navigation';
 import { products, Product } from '@/data/products';
 import { useCart } from '../context/CartContext';
 import Link from 'next/link';
-// Import Loader2 to fix the 'not defined' error
 import { ShoppingCart, Filter, SearchX, Star, Loader2 } from 'lucide-react'; 
 import QuantityModal from '../components/QuantityModal';
+
+// --- HELPER FUNCTION FOR PRICING ---
+const getStartingPrice = (product: Product) => {
+  const name = product.name.toLowerCase();
+  const isLiquid = name.match(/oil|ghee|squash|juice|liquid|burans|rhododendron|syrup|ark/);
+  // Matches logic in QuantityModal: 0.35x for liquids, 0.30x for others (250g/ml)
+  // Exception: Spices used 0.30 in modal update, so consistent here.
+  const multiplier = isLiquid ? 0.35 : 0.30;
+  const unit = isLiquid ? "250 ml" : "250 gm";
+  const price = Math.round(product.price * multiplier);
+  return { price, unit };
+};
 
 function ShopContent() {
   const { addToCart } = useCart();
   const searchParams = useSearchParams();
   
-  // Get search term from URL
   const searchTerm = searchParams.get('search')?.toLowerCase() || "";
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  // Filter Logic
   const filteredProducts = useMemo(() => {
     if (!searchTerm) return products;
-    
     return products.filter((product: Product) => {
       const nameMatch = product.name.toLowerCase().includes(searchTerm);
       const descMatch = product.desc.toLowerCase().includes(searchTerm);
       const categoryMatch = product.category?.toLowerCase().includes(searchTerm);
-      
       return nameMatch || descMatch || categoryMatch;
     });
   }, [searchTerm]);
@@ -51,7 +58,7 @@ function ShopContent() {
         onConfirm={handleConfirmAdd} 
       />
 
-      {/* --- MODERN HEADER --- */}
+      {/* --- HEADER --- */}
       <div className="text-center mb-16 space-y-4">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#6BBF46]/10 text-[#6BBF46] text-[10px] font-bold uppercase tracking-[0.2em]">
           <Star size={12} fill="currentColor" /> Premium Organic Selection
@@ -67,7 +74,7 @@ function ShopContent() {
         </p>
       </div>
 
-      {/* --- CLASSIC FILTERS BAR --- */}
+      {/* --- FILTERS BAR --- */}
       <div className="flex justify-between items-end mb-10 pb-6 border-b border-gray-100">
         <div>
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Catalogue</p>
@@ -96,46 +103,54 @@ function ShopContent() {
           </Link>
         </div>
       ) : (
-        /* --- MODERN PRODUCT GRID --- */
+        /* --- PRODUCT GRID --- */
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-          {filteredProducts.map((product) => (
-            <div key={product.id} className="group flex flex-col">
-              <div className="relative aspect-[4/5] w-full bg-[#F5F9F5] rounded-[2.5rem] overflow-hidden mb-6 border border-transparent group-hover:border-[#6BBF46]/20 transition-all duration-500 shadow-sm group-hover:shadow-2xl group-hover:-translate-y-2">
-                <Link href={`/product/${product.id}`} className="block w-full h-full">
-                  <img 
-                    src={product.image} 
-                    alt={product.name} 
-                    className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700"
-                  />
-                </Link>
-                
-                {/* Cart Button: Always Visible */}
-                <button 
-                  onClick={() => openQuickAdd(product)}
-                  className="absolute bottom-6 right-6 bg-[#6BBF46] p-4 rounded-2xl shadow-xl text-white hover:bg-[#053B28] hover:scale-110 active:scale-95 transition-all duration-300 z-10"
-                >
-                  <ShoppingCart size={22} strokeWidth={2.5} />
-                </button>
+          {filteredProducts.map((product) => {
+            // Calculate Display Price
+            const { price: startPrice, unit: startUnit } = getStartingPrice(product);
 
-                <div className="absolute top-6 left-6 px-4 py-1.5 bg-white rounded-full border border-gray-100 shadow-sm">
-                  <span className="text-[10px] font-bold text-[#6BBF46] uppercase tracking-wider">100% Organic</span>
+            return (
+              <div key={product.id} className="group flex flex-col">
+                <div className="relative aspect-[4/5] w-full bg-[#F5F9F5] rounded-[2.5rem] overflow-hidden mb-6 border border-transparent group-hover:border-[#6BBF46]/20 transition-all duration-500 shadow-sm group-hover:shadow-2xl group-hover:-translate-y-2">
+                  <Link href={`/product/${product.id}`} className="block w-full h-full">
+                    <img 
+                      src={product.image} 
+                      alt={product.name} 
+                      className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700"
+                    />
+                  </Link>
+                  
+                  <button 
+                    onClick={() => openQuickAdd(product)}
+                    className="absolute bottom-6 right-6 bg-[#6BBF46] p-4 rounded-2xl shadow-xl text-white hover:bg-[#053B28] hover:scale-110 active:scale-95 transition-all duration-300 z-10"
+                  >
+                    <ShoppingCart size={22} strokeWidth={2.5} />
+                  </button>
+
+                  <div className="absolute top-6 left-6 px-4 py-1.5 bg-white rounded-full border border-gray-100 shadow-sm">
+                    <span className="text-[10px] font-bold text-[#6BBF46] uppercase tracking-wider">100% Organic</span>
+                  </div>
+                </div>
+                
+                <div className="px-1 space-y-1">
+                  <Link href={`/product/${product.id}`}>
+                    <h4 className="text-xl font-bold text-[#053B28] leading-tight hover:text-[#6BBF46] transition-colors line-clamp-2">
+                      {product.name}
+                    </h4>
+                  </Link>
+                  <p className="text-xs text-gray-400 font-medium line-clamp-1">{product.desc}</p>
+                  
+                  {/* UPDATED PRICE SECTION */}
+                  <div className="pt-2 flex items-baseline gap-2">
+                    <span className="text-2xl font-black text-[#053B28]">₹{startPrice}</span>
+                    <span className="text-xs text-gray-400 font-bold uppercase tracking-wide">
+                        / {startUnit}
+                    </span>
+                  </div>
                 </div>
               </div>
-              
-              <div className="px-1 space-y-1">
-                <Link href={`/product/${product.id}`}>
-                  <h4 className="text-xl font-bold text-[#053B28] leading-tight hover:text-[#6BBF46] transition-colors line-clamp-2">
-                    {product.name}
-                  </h4>
-                </Link>
-                <p className="text-xs text-gray-400 font-medium line-clamp-1">{product.desc}</p>
-                <div className="pt-2 flex items-baseline gap-3">
-                  <span className="text-2xl font-black text-[#053B28]">₹{product.price}</span>
-                  <span className="text-sm text-gray-300 line-through font-medium">₹{product.price + 50}</span>
-                </div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

@@ -44,7 +44,7 @@ export const products: Product[] = [
   { 
     id: 2, 
     name: "Gahat (Horse Gram)", 
-    price: 220, 
+    price: 280, 
     image: "/hourse_grams.svg", 
     desc: "Warm potency, kidney stone remedy.",
     category: "Pulses",
@@ -121,7 +121,7 @@ export const products: Product[] = [
   },
   { 
     id: 5, 
-    name: "Pahadi Tor (Toor Dal)", 
+    name: "Pahadi Tor (Sabut Toor Dal)", 
     price: 260, 
     image: "/toor.svg", 
     desc: "Sweet, earthy mountain pigeon pea.",
@@ -172,7 +172,7 @@ export const products: Product[] = [
   { 
     id: 7, 
     name: "Pahadi Urad (Black Gram)", 
-    price: 210, 
+    price: 310, 
     image: "/Pahadi_Urad.svg", 
     desc: "Perfect for Garhwali Chainsu.",
     category: "Pulses",
@@ -226,7 +226,7 @@ export const products: Product[] = [
   { 
     id: 9, 
     name: "Jakhya (Wild Mustard)", 
-    price: 150, 
+    price: 400, 
     image: "/Jakhya.svg", 
     desc: "Crunchy tempering spice (Tadka).",
     category: "Spices",
@@ -252,7 +252,7 @@ export const products: Product[] = [
   { 
     id: 10, 
     name: "Jambu (Himalayan Chives)", 
-    price: 450, 
+    price: 1800, 
     image: "/Jambu.svg", 
     desc: "Aromatic herb for tempering.",
     category: "Spices",
@@ -277,7 +277,7 @@ export const products: Product[] = [
   { 
     id: 11, 
     name: "Gandrayani (Angelica)", 
-    price: 550, 
+    price: 1900, 
     image: "/Gandrayani.svg", 
     desc: "Fragrant root for digestion.",
     category: "Spices",
@@ -303,7 +303,7 @@ export const products: Product[] = [
   { 
     id: 12, 
     name: "Bhangjeera (Hemp Seeds)", 
-    price: 320, 
+    price: 425, 
     image: "/Hemp_Seeds.svg", 
     desc: "Nutty seeds for Chutney.",
     category: "Spices",
@@ -328,7 +328,7 @@ export const products: Product[] = [
   { 
     id: 13, 
     name: "Timur (Sichuan Pepper)", 
-    price: 380, 
+    price: 800, 
     image: "/Timur.svg", 
     desc: "Zesty, numbing Himalayan spice.",
     category: "Spices",
@@ -354,7 +354,7 @@ export const products: Product[] = [
   { 
     id: 14, 
     name: "Lakhori Mirch (Yellow Chili)", 
-    price: 420, 
+    price: 750, 
     image: "/Lakhori_Mirch.svg", 
     desc: "Spicy yellow turmeric-chili.",
     category: "Spices",
@@ -401,7 +401,7 @@ export const products: Product[] = [
   { 
     id: 16, 
     name: "Kala Jeera (Wild Cumin)", 
-    price: 600, 
+    price: 1300, 
     image: "/Kala_Jeera.svg", 
     desc: "Rare high-altitude cumin.",
     category: "Spices",
@@ -478,7 +478,7 @@ export const products: Product[] = [
   { 
     id: 19, 
     name: "Jhangora (Barnyard Millet)", 
-    price: 140, 
+    price: 180, 
     image: "/Jhangora.svg", 
     desc: "Himalayan super-grain rice.",
     category: "Grains",
@@ -503,7 +503,7 @@ export const products: Product[] = [
   { 
     id: 20, 
     name: "Lal Chawal (Red Rice)", 
-    price: 190, 
+    price: 195, 
     image: "/Red_Rice.svg", 
     desc: "Nutty indigenous rice.",
     category: "Grains",
@@ -554,8 +554,8 @@ export const products: Product[] = [
   // --- FOREST PRODUCE ---
   { 
     id: 22, 
-    name: "Burans (Rhododendron)", 
-    price: 450, 
+    name: "Premium Burans (Rhododendron)", 
+    price: 350, 
     image: "/Rhododendron.svg", 
     desc: "Dried petals for tea/juice.",
     category: "Forest Produce",
@@ -580,7 +580,7 @@ export const products: Product[] = [
   { 
     id: 23, 
     name: "Bichoo Ghas (Nettle Tea)", 
-    price: 350, 
+    price: 1550, 
     image: "/nettel_tea.svg", 
     desc: "Wild harvested detox tea.",
     category: "Forest Produce",
@@ -604,7 +604,7 @@ export const products: Product[] = [
   { 
     id: 24, 
     name: "Duna (Himalayan Oregano)", 
-    price: 180, 
+    price: 2000, 
     image: "/Duna.svg", 
     desc: "Wild mountain oregano.",
     category: "Forest Produce",
@@ -628,7 +628,7 @@ export const products: Product[] = [
   { 
     id: 25, 
     name: "Linguda (Fiddlehead Fern)", 
-    price: 280, 
+    price: 1500, 
     image: "/Linguda.svg", 
     desc: "Pickled wild fern.",
     category: "Forest Produce",
@@ -652,7 +652,7 @@ export const products: Product[] = [
   { 
     id: 26, 
     name: "Pahadi Garlic (Honey infused)", 
-    price: 650, 
+    price: 1500, 
     image: "/Honey_garlic.svg", 
     desc: "Immunity booster.",
     category: "Forest Produce",
@@ -676,7 +676,7 @@ export const products: Product[] = [
   { 
     id: 27, 
     name: "Apricot Kernel Oil (Chuli)", 
-    price: 800, 
+    price: 2200, 
     image: "/Apricot_oil.svg", 
     desc: "Guttti Ka Tel (Joint pain).",
     category: "Forest Produce",
@@ -700,7 +700,7 @@ export const products: Product[] = [
   { 
     id: 28, 
     name: "Perilla Seeds (Bhangjeera)", 
-    price: 300, 
+    price: 450, 
     image: "/Perilla_Seeds.svg", 
     desc: "Rich in Omega-3.",
     category: "Forest Produce",
@@ -749,7 +749,7 @@ export const products: Product[] = [
   { 
     id: 31, 
     name: "Giloy (Guduchi) Stem/Powder", 
-    price: 180, 
+    price: 900, 
     image: "/Giloy.svg", 
     desc: "Amrita: The Root of Immortality.",
     category: "Wellness",
@@ -774,7 +774,7 @@ export const products: Product[] = [
   { 
     id: 32, 
     name: "Moringa (Sahjan) Leaf Powder", 
-    price: 240, 
+    price: 750, 
     image: "/moringa.svg", 
     desc: "Himalayan Green Superfood.",
     category: "Wellness",

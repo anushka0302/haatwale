@@ -5,7 +5,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 // === TYPES ===
 export interface CartItem {
   id: number;
-  uniqueId: string; // The crucial ID for deleting
+  uniqueId: string;
   name: string;
   price: number;
   image: string;
@@ -19,6 +19,7 @@ interface CartContextType {
   cart: CartItem[];
   addToCart: (product: Product, variant: string, finalPrice: number) => void;
   removeFromCart: (uniqueId: string) => void;
+  clearCart: () => void; 
   totalPrice: number;
   toastMessage: string | null;
   closeToast: () => void;
@@ -30,20 +31,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // 1. LOAD CART (With Cleanup for old buggy items)
+  // 1. LOAD CART (Functional update prevents cascading render error)
+  // 1. LOAD CART (Deferred update to prevent cascading render error)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedCart = localStorage.getItem('haatwale_cart');
       if (savedCart) {
         try {
-          // FIX: Cast the parsed JSON as CartItem[] so TypeScript knows the structure
           const parsedCart = JSON.parse(savedCart) as CartItem[];
-          
-          // Filter out items that don't have uniqueId (Old data that causes bugs)
-          // No need for 'any' here now because 'parsedCart' is typed
           const validItems = parsedCart.filter((item) => item.uniqueId);
           
-          setTimeout(() => setCart(validItems), 0);
+          // Using setTimeout(..., 0) ensures the update happens after 
+          // the initial render is complete, clearing the error.
+          setTimeout(() => {
+            setCart(validItems);
+          }, 0);
         } catch (e) {
           console.error("Failed to parse cart", e);
         }
@@ -51,7 +53,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // 2. SAVE CART
+  // 2. SAVE CART (Sync state to LocalStorage)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('haatwale_cart', JSON.stringify(cart));
@@ -84,9 +86,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // REMOVE FUNCTION (Strictly checks uniqueId)
   const removeFromCart = (uniqueId: string) => {
     setCart((prevCart) => prevCart.filter((item) => item.uniqueId !== uniqueId));
+  };
+
+  // Action to wipe state and storage after successful payment
+  const clearCart = () => {
+    setCart([]);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('haatwale_cart');
+    }
   };
 
   const closeToast = () => setToastMessage(null);
@@ -94,7 +103,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const totalPrice = cart.reduce((total, item) => total + item.price * item.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, totalPrice, toastMessage, closeToast }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, totalPrice, toastMessage, closeToast }}>
       {children}
     </CartContext.Provider>
   );
