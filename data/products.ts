@@ -70,7 +70,7 @@ export const products: Product[] = [
   { 
     id: 3, 
     name: "Munsiyari Rajma", 
-    price: 350, 
+    price: 380, 
     image: "/munsiyari_rajma.svg", 
     desc: "Creamy, premium white kidney beans.",
     category: "Pulses",
@@ -303,7 +303,7 @@ export const products: Product[] = [
   { 
     id: 12, 
     name: "Bhangjeera (Hemp Seeds)", 
-    price: 425, 
+    price: 525, 
     image: "/Hemp_Seeds.svg", 
     desc: "Nutty seeds for Chutney.",
     category: "Spices",
@@ -328,7 +328,7 @@ export const products: Product[] = [
   { 
     id: 13, 
     name: "Timur (Sichuan Pepper)", 
-    price: 800, 
+    price: 1100, 
     image: "/Timur.svg", 
     desc: "Zesty, numbing Himalayan spice.",
     category: "Spices",
